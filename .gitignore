@@ -1,0 +1,9 @@
+node_modules
+.next
+.env*.local
+.env
+*.tsbuildinfo
+
+# local test stack (contains dev keys and logs)
+local-stack/
+*.png

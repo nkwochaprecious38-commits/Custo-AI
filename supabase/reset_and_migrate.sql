@@ -1056,6 +1056,20 @@ end; $$;
 
 grant execute on all functions in schema public to authenticated, service_role;
 revoke execute on function public.handle_new_user() from authenticated, anon;
+
+-- Remove a workspace automatically when its last member is removed or their account is deleted
+create or replace function public.cleanup_empty_org()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if not exists (select 1 from public.organization_members where org_id = old.org_id) then
+    delete from public.organizations where id = old.org_id;
+  end if;
+  return null;
+end; $$;
+
+drop trigger if exists cleanup_empty_org on public.organization_members;
+create trigger cleanup_empty_org after delete on public.organization_members
+for each row execute function public.cleanup_empty_org();
 -- Product image storage (Supabase Storage). Images are public to read; only workspace editors can upload into their organization folder.
 insert into storage.buckets (id, name, public) values ('product-images', 'product-images', true) on conflict (id) do nothing;
 

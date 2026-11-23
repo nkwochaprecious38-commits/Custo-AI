@@ -34,6 +34,7 @@ type Ctx = {
 
 const OrgCtx = createContext<Ctx | null>(null);
 const KEY = 'custo_current_org';
+let inflightWorkspace: Promise<{ error: { message: string } | null }> | null = null;
 
 export function useOrg() {
   const c = useContext(OrgCtx);
@@ -60,7 +61,9 @@ export function OrgProvider({ children, loading, failed }: { children: ReactNode
     if (ms.length === 0) {
       // Safety net: provision a workspace if the signup trigger did not run.
       const name = (user.user_metadata?.company_name as string) || 'My workspace';
-      const { error: wErr } = await supabase.rpc('create_workspace', { p_name: name, p_website: user.user_metadata?.website ?? null });
+      // Share one in-flight request so concurrent loads (for example React strict mode) cannot create two workspaces
+      inflightWorkspace ??= Promise.resolve(supabase.rpc('create_workspace', { p_name: name, p_website: user.user_metadata?.website ?? null })).finally(() => { setTimeout(() => { inflightWorkspace = null; }, 3000); });
+      const { error: wErr } = await inflightWorkspace;
       if (wErr) { setError('Your account has no workspace yet and we could not create one: ' + wErr.message); return; }
       const again = await supabase.from('organization_members').select('org_id, role, organizations(id, name, slug, website, plan, demo_seeded_at)').eq('user_id', user.id);
       ms = (again.data ?? []) as unknown as Membership[];

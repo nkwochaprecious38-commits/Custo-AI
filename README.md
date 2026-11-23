@@ -1,30 +1,29 @@
 # Custo AI
 
-B2B e-commerce personalization platform. Next.js 15, TypeScript, Tailwind, Supabase (Auth, PostgreSQL with row level security, Storage), Recharts, Lucide.
+E-commerce personalization platform: marketing site, working authentication and a multi tenant dashboard.
+Stack: Next.js 15 (App Router), TypeScript, Tailwind CSS, Supabase (Auth, Postgres, RLS), Recharts, Lucide.
 
-## Set up with your Supabase project
+## Setup
 
-1. Create a project at supabase.com.
-2. In the SQL editor run, in order: `supabase/migrations/0001_schema.sql`, `0002_functions.sql`, `0003_storage.sql`.
-3. Authentication settings:
-   - Email provider on, **Confirm email** on (email verification).
-   - Site URL: your app URL. Redirect URLs: `https://YOUR_APP/auth/callback` and `http://localhost:3000/auth/callback`.
-4. Copy `.env.example` to `.env.local` and fill in the URL, anon key, service role key (server only) and site URL.
-5. `npm install && npm run dev`
+1. Create a Supabase project.
+2. Run `supabase/schema.sql` in the SQL editor. It creates every table, row level security policy and the sign up trigger that creates each user's organization.
+3. In Supabase, Authentication, URL Configuration: set Site URL to your site and add `<site>/auth/callback` to Redirect URLs.
+4. Copy `.env.example` to `.env.local` and fill in the three values.
+5. `npm install`, then `npm run dev` (or `npm run build && npm start`).
 
-Optional: set `ANTHROPIC_API_KEY` to enable AI answers in the Commerce Assistant and AI query understanding in Search. Without it both use the built in analysis.
+Email verification follows your Supabase setting (Authentication, Providers, Email, "Confirm email"). When on, sign up shows a "check your email" screen and the link lands on the dashboard.
 
 ## Security model
-- Every table has row level security scoped by organization membership; roles gate writes.
-- Integration credentials live in `integration_credentials` with no policies: only the server (service role) can read them.
-- The service role key and Anthropic key are used only in server routes under `src/app/api`.
-- Storefront tracking uses a per store tracking key and stores events only when `consent: true` is sent.
 
-## Pricing
-Edit plan prices and intervals in `src/app/(marketing)/pricing/page.tsx` (`price` and `interval`). Selar URLs are unchanged.
+* Every business table has `org_id` and RLS policies using `is_member`, `can_write` and `is_org_admin`. Analysts and Team Members are read only at the database level.
+* `/dashboard/*` is protected in middleware and again in the server layout.
+* Store credentials go through `/api/integrations/shopify`, which tests them against Shopify and writes them with the service role to `integration_secrets`. That table has no policies, so browsers can never read it.
+* `audit_logs` is append only (no update or delete policy).
 
-## Logo
-All pages use `src/components/Logo.tsx`. Replace it once the final logo is chosen. `public/favicon.svg` is a placeholder.
+## Honest status
 
-## Local test stack
-`local-stack/start.sh` starts Postgres, Supabase GoTrue, PostgREST and a mail catcher for offline testing.
+* Real: auth, organizations, roles, invitations, catalog (CSV import), recommendation, segment, merchandising, content, campaign and experiment records, synonyms, audit log, Shopify connect, test and product import.
+* Demo data, labeled in the UI: traffic, conversion, revenue and search metrics, until an event collection script exists. The `behavioral_events`, `rec_impressions`, `rec_clicks`, `orders` and `search_queries` tables are ready for it.
+* Not built yet: connectors other than Shopify, invitation emails (links are copied manually), a storefront script that serves recommendations, and an LLM behind the assistant (it answers from demo data with rules).
+* Logo: `components/Logo.tsx` is a placeholder. Replace it when the final logo is ready.
+* Pricing: prices are not shown. Edit `PLANS` in `app/(site)/pricing/page.tsx` once confirmed. The three Selar links are in `lib/content.ts`.

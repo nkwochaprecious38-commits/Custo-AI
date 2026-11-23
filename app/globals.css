@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply bg-white text-charcoal font-sans antialiased; }
+  h1, h2, h3, h4 { @apply font-heading text-charcoal tracking-tight; }
+  :focus-visible { outline: 2px solid #0F5257; outline-offset: 2px; }
+}
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply btn bg-pink text-ink hover:bg-pink-dark; }
+  .btn-dark { @apply btn bg-charcoal text-white hover:bg-ink; }
+  .btn-ghost { @apply btn border border-charcoal/15 bg-white text-charcoal hover:bg-soft; }
+  .btn-danger { @apply btn bg-danger text-white hover:opacity-90; }
+  .btn-sm { @apply px-3 py-1.5 text-xs rounded-lg; }
+  .card { @apply rounded-2xl border border-charcoal/10 bg-white shadow-card; }
+  .input { @apply w-full rounded-xl border border-charcoal/20 bg-white px-3.5 py-2.5 text-sm text-charcoal placeholder:text-muted/70 focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20; }
+  .label { @apply mb-1.5 block text-sm font-medium text-charcoal; }
+  .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.14em] text-teal; }
+  .container-x { @apply mx-auto w-full max-w-6xl px-5 sm:px-8; }
+  .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+}

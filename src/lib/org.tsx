@@ -57,7 +57,8 @@ export function OrgProvider({ children, loading, failed }: { children: ReactNode
       supabase.from('organization_members').select('org_id, role, organizations(id, name, slug, website, plan, demo_seeded_at)').eq('user_id', user.id).order('created_at'),
     ]);
     if (mErr) { setError('We could not load your workspace. Check your connection and try again.'); return; }
-    let ms = (memberships ?? []) as unknown as Membership[];
+    // Ignore memberships whose workspace cannot be read (for example when database access rules are misconfigured)
+    let ms = ((memberships ?? []) as unknown as Membership[]).filter((m) => m.organizations);
     if (ms.length === 0) {
       // Safety net: provision a workspace if the signup trigger did not run.
       const name = (user.user_metadata?.company_name as string) || 'My workspace';
@@ -66,7 +67,8 @@ export function OrgProvider({ children, loading, failed }: { children: ReactNode
       const { error: wErr } = await inflightWorkspace;
       if (wErr) { setError('Your account has no workspace yet and we could not create one: ' + wErr.message); return; }
       const again = await supabase.from('organization_members').select('org_id, role, organizations(id, name, slug, website, plan, demo_seeded_at)').eq('user_id', user.id);
-      ms = (again.data ?? []) as unknown as Membership[];
+      ms = ((again.data ?? []) as unknown as Membership[]).filter((m) => m.organizations);
+      if (ms.length === 0) { setError('Your workspace was created but cannot be read. The database access rules for this project may have been changed. Ask your administrator to re-run the Custo AI setup SQL.'); return; }
     }
     // Load the demo dataset once for new workspaces so every module has clearly labeled sample data.
     for (const m of ms) {

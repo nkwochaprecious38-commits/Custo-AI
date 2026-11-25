@@ -25,5 +25,5 @@ Email verification follows your Supabase setting (Authentication, Providers, Ema
 * Real: auth, organizations, roles, invitations, catalog (CSV import), recommendation, segment, merchandising, content, campaign and experiment records, synonyms, audit log, Shopify connect, test and product import.
 * Demo data, labeled in the UI: traffic, conversion, revenue and search metrics, until an event collection script exists. The `behavioral_events`, `rec_impressions`, `rec_clicks`, `orders` and `search_queries` tables are ready for it.
 * Not built yet: connectors other than Shopify, invitation emails (links are copied manually), a storefront script that serves recommendations, and an LLM behind the assistant (it answers from demo data with rules).
-* Logo: `components/Logo.tsx` is a placeholder. Replace it when the final logo is ready.
+* Logo: the final mark is in `public/logo-mark.svg` (favicon `app/icon.svg`) and rendered by `components/Logo.tsx`.
 * Pricing: prices are not shown. Edit `PLANS` in `app/(site)/pricing/page.tsx` once confirmed. The three Selar links are in `lib/content.ts`.

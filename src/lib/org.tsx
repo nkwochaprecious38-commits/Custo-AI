@@ -56,7 +56,13 @@ export function OrgProvider({ children, loading, failed }: { children: ReactNode
       supabase.from('profiles').select('id, full_name, email').eq('id', user.id).maybeSingle(),
       supabase.from('organization_members').select('org_id, role, organizations(id, name, slug, website, plan, demo_seeded_at)').eq('user_id', user.id).order('created_at'),
     ]);
-    if (mErr) { setError('We could not load your workspace. Check your connection and try again.'); return; }
+    if (mErr) {
+      const m = mErr.message || '';
+      const hint = /invalid schema|PGRST106/i.test(m) ? ' The "custo" schema is not exposed yet: add it under Supabase, Project Settings, Data API, Exposed schemas.'
+        : /does not exist|PGRST20[0-9]|schema cache/i.test(m) ? ' The Custo AI tables were not found: run supabase/custo_schema.sql in the Supabase SQL editor.'
+        : /permission denied/i.test(m) ? ' Database permissions are missing for the custo schema: re-run supabase/custo_schema.sql.' : '';
+      setError('We could not load your workspace. Details: ' + m + '.' + hint); return;
+    }
     // Ignore memberships whose workspace cannot be read (for example when database access rules are misconfigured)
     let ms = ((memberships ?? []) as unknown as Membership[]).filter((m) => m.organizations);
     if (ms.length === 0) {

@@ -1,11 +1,12 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { SUPABASE_ANON_KEY, SUPABASE_URL, REMEMBER_COOKIE, applyRemember } from './env';
+import { SUPABASE_ANON_KEY, SUPABASE_URL, REMEMBER_COOKIE, applyRemember, DB_SCHEMA } from './env';
 
 export async function getServerSupabase() {
   const store = await cookies();
   const remember = store.get(REMEMBER_COOKIE)?.value !== '0';
   return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    db: { schema: DB_SCHEMA },
     cookies: {
       getAll: () => store.getAll(),
       setAll: (list) => {

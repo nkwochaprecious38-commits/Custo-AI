@@ -2,7 +2,7 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Brand, Category, MerchRule, Perf, Product } from './types';
 
-export async function loadStoreData(db: SupabaseClient, org: string) {
+export async function loadStoreData(db: SupabaseClient<any, any, any>, org: string) {
   const products: Product[] = [];
   for (let a = 0; ; a += 1000) {
     const { data } = await db.from('products').select('*').eq('org_id', org).eq('status', 'active').range(a, a + 999);

@@ -1,9 +1,10 @@
 'use client';
 import { createBrowserClient } from '@supabase/ssr';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { SUPABASE_ANON_KEY, SUPABASE_URL, REMEMBER_COOKIE, applyRemember } from './env';
+import { SUPABASE_ANON_KEY, SUPABASE_URL, REMEMBER_COOKIE, applyRemember, DB_SCHEMA } from './env';
 
-let client: SupabaseClient | null = null;
+type Db = SupabaseClient<any, any, any>;
+let client: Db | null = null;
 
 function readCookies() {
   if (typeof document === 'undefined') return [];
@@ -22,9 +23,10 @@ function serialize(name: string, value: string, o: Record<string, unknown> = {})
   return s;
 }
 
-export function getSupabase(): SupabaseClient {
+export function getSupabase(): Db {
   if (client) return client;
   client = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    db: { schema: DB_SCHEMA },
     cookies: {
       getAll: () => readCookies(),
       setAll: (list) => {
